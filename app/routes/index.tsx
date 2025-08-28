@@ -1,7 +1,10 @@
-import type { Route } from './+types/home';
+import type { Route } from './+types/index';
 
 export function meta({}: Route.MetaArgs) {
-  return [{ title: 'New React Router App' }, { name: 'description', content: 'Welcome to React Router!' }];
+  return [
+    { title: 'TaskFlow' },
+    { name: 'description', content: 'Note your everyday tasks' },
+  ];
 }
 
 export default function Home() {

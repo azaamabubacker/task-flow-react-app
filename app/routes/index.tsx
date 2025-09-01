@@ -10,9 +10,8 @@ export function meta({}: Route.MetaArgs) {
 export default function Home() {
   return (
     <main>
-      <section>
-        <h1>Welcome Taskflow app</h1>
-      </section>
+      <h2 style={{ marginTop: 0 }}>Dashboard</h2>
+      <p>Welcome to TaskFlow.</p>
     </main>
   );
 }

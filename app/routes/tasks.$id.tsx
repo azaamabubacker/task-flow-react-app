@@ -1,10 +1,12 @@
 import {
   Form,
   useLoaderData,
+  useActionData,
   redirect,
   type ClientActionFunctionArgs,
   type ClientLoaderFunctionArgs,
 } from 'react-router';
+import { z } from 'zod';
 import { loadTasks, saveTasks } from '~/lib/storage';
 
 // ---------- READ ----------
@@ -16,6 +18,10 @@ export async function clientLoader({ params }: ClientLoaderFunctionArgs) {
 }
 
 // ---------- WRITE ----------
+const updateSchema = z.object({
+  title: z.string().trim().min(1, 'Title is required'),
+});
+
 export async function clientAction({
   request,
   params,
@@ -39,12 +45,26 @@ export async function clientAction({
     return redirect(`/tasks/${params.id}`);
   }
 
+  if (intent === 'update') {
+    const parsed = updateSchema.safeParse({ title: form.get('title') });
+    if (!parsed.success) {
+      return { error: parsed.error.issues[0]?.message ?? 'Invalid title' };
+    }
+    const tasks = loadTasks();
+    const next = tasks.map((t) =>
+      t.id === params.id ? { ...t, title: parsed.data.title } : t,
+    );
+    saveTasks(next);
+    return redirect(`/tasks/${params.id}`);
+  }
+
   return redirect(`/tasks/${params.id}`);
 }
 
 // ---------- UI ----------
 export default function TaskDetailsPage() {
   const { task } = useLoaderData() as { task: Task };
+  const actionData = useActionData() as { error?: string } | undefined;
 
   return (
     <article>
@@ -73,15 +93,44 @@ export default function TaskDetailsPage() {
         </div>
       </header>
 
-      <p style={{ color: '#666', marginTop: 12 }}>
-        <strong>Title:</strong> {task.title}
-      </p>
-      <p style={{ color: '#666' }}>
-        <strong>Status:</strong> {task.completed ? 'Completed' : 'Active'}
-      </p>
-      <p style={{ color: '#666' }}>
-        <strong>Created:</strong> {new Date(task.createdAt).toLocaleString()}
-      </p>
+      {/* Edit title */}
+      <section style={{ marginTop: 16 }}>
+        <Form
+          method="post"
+          style={{ display: 'flex', gap: 8, alignItems: 'center' }}
+        >
+          <label htmlFor="title">Title</label>
+          <input
+            id="title"
+            name="title"
+            defaultValue={task.title}
+            aria-describedby="title-help title-error"
+          />
+          <input type="hidden" name="intent" value="update" />
+          <button type="submit">Save</button>
+        </Form>
+        <p id="title-help" style={{ color: '#666', marginTop: 6 }}>
+          Update the task title and click Save.
+        </p>
+        {actionData?.error && (
+          <p
+            id="title-error"
+            role="alert"
+            style={{ color: '#b00020', marginTop: 6 }}
+          >
+            {actionData.error}
+          </p>
+        )}
+      </section>
+
+      <section style={{ color: '#666', marginTop: 16 }}>
+        <p>
+          <strong>Status:</strong> {task.completed ? 'Completed' : 'Active'}
+        </p>
+        <p>
+          <strong>Created:</strong> {new Date(task.createdAt).toLocaleString()}
+        </p>
+      </section>
     </article>
   );
 }

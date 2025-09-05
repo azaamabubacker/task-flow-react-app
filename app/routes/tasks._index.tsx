@@ -9,6 +9,7 @@ import {
   type ClientLoaderFunctionArgs,
 } from 'react-router';
 import { z } from 'zod';
+import { createId } from '~/lib/id';
 import { loadTasks, saveTasks } from '~/lib/storage';
 import type { Task } from '~/types/task';
 
@@ -187,13 +188,33 @@ export default function TasksListPage() {
         </h3>
 
         {visible.length === 0 ? (
-          <p style={{ color: '#666', marginTop: 8 }}>
-            {filter === 'completed'
-              ? 'No completed tasks yet.'
-              : filter === 'active'
-                ? 'No active tasks. Take a break?'
-                : 'No tasks yet. Add your first one above.'}
-          </p>
+          <div
+            role="status"
+            aria-live="polite"
+            style={{
+              marginTop: 12,
+              padding: 16,
+              border: '1px dashed #ddd',
+              background: '#fff',
+              borderRadius: 12,
+              color: '#555',
+            }}
+          >
+            <h4 style={{ margin: '0 0 6px 0' }}>
+              {filter === 'completed'
+                ? 'No completed tasks (yet)'
+                : filter === 'active'
+                  ? 'Everything is done!'
+                  : 'No tasks yet'}
+            </h4>
+            <p style={{ margin: 0 }}>
+              {filter === 'completed'
+                ? 'Mark a task as done from the list to see it here.'
+                : filter === 'active'
+                  ? 'Great job. Add a new task to keep the momentum.'
+                  : 'Add your first task above to get started.'}
+            </p>
+          </div>
         ) : (
           <ul style={{ marginTop: 8, padding: 0, listStyle: 'none' }}>
             {visible.map((t) => (

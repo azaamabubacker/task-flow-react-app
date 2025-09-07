@@ -45,5 +45,3 @@ const styles: Record<string, React.CSSProperties> = {
   main: { display: 'flex', flexDirection: 'column', minWidth: 0 },
   content: { padding: 24, minWidth: 0 },
 };
-
-// Optional: you can also export an ErrorBoundary here if you want a global fallback.
